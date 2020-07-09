@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import filesize from 'filesize';
-
 import Header from '../../components/Header';
 import FileList from '../../components/FileList';
 import Upload from '../../components/Upload';
 
-import { Container, Title, ImportFileContainer, Footer } from './styles';
+import { Container, Title, ImportFileContainer, Footer, Error } from './styles';
 
 import alert from '../../assets/alert.svg';
 import api from '../../services/api';
@@ -20,22 +19,36 @@ interface FileProps {
 
 const Import: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<FileProps[]>([]);
+  const [hasError, setHasError] = useState('');
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
-
-    // TODO
-
+    const data = new FormData();
+    if (uploadedFiles.length) {
+      data.append('file', uploadedFiles[0].file);
+      setHasError('');
+    } else {
+      setHasError('Arquivo não selecionado');
+      return;
+    }
     try {
-      // await api.post('/transactions/import', data);
+      await api.post('/transactions/import', data);
+
+      // alert('Importação efetuada.');
+      history.push('/');
     } catch (err) {
-      // console.log(err.response.error);
+      setHasError('Ocorreu um erro na importação');
     }
   }
 
   function submitFile(files: File[]): void {
-    // TODO
+    const filesUploaded = files.map(file => ({
+      file,
+      name: file.name,
+      readableSize: filesize(file.size),
+    }));
+    setUploadedFiles(filesUploaded);
+    setHasError('');
   }
 
   return (
@@ -56,6 +69,7 @@ const Import: React.FC = () => {
               Enviar
             </button>
           </Footer>
+          {hasError && <Error>{hasError}</Error>}
         </ImportFileContainer>
       </Container>
     </>

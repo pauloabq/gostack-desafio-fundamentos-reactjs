@@ -54,3 +54,10 @@ export const Footer = styled.section`
     }
   }
 `;
+
+export const Error = styled.span`
+  display: block;
+  text-align: center;
+  color: #c53030;
+  margin-top: 8px;
+`;
